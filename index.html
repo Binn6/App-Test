@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pelaporan Kegiatan Balikpapan</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>Pelaporan Kegiatan Triwulan Balikpapan</h1>
+      <p>Prototipe end-to-end untuk kelompok pelapor, KPH, dan Balai PS.</p>
+      <div id="networkBanner" class="banner online">Online</div>
+    </header>
+
+    <main>
+      <section id="authSection" class="card">
+        <h2>Login / Sign up</h2>
+        <form id="authForm" class="grid-2">
+          <label>
+            Peran
+            <select id="roleSelect">
+              <option value="PELAPOR">Pelapor Kelompok</option>
+              <option value="VERIFIKATOR">Verifikator KPH</option>
+              <option value="BALAI">Penerima Balai PS</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </label>
+          <label>
+            Nama Akun / Kelompok
+            <input id="nameInput" required placeholder="Contoh: Kelompok Hutan Lestari" />
+          </label>
+          <label>
+            Email
+            <input id="emailInput" type="email" required placeholder="email@contoh.id" />
+          </label>
+          <label>
+            Wilayah
+            <input id="regionInput" value="Balikpapan" />
+          </label>
+          <div class="actions full-width">
+            <button type="submit">Masuk</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="appSection" class="hidden">
+        <div class="top-row card">
+          <div>
+            <strong id="activeUser"></strong>
+            <p id="activeRole"></p>
+          </div>
+          <div class="actions">
+            <button id="syncBtn">Sync Draft Offline</button>
+            <button id="logoutBtn" class="secondary">Keluar</button>
+          </div>
+        </div>
+
+        <section class="card" id="dashboardSection">
+          <h2>Dashboard Ringkas</h2>
+          <div id="kpiCards" class="kpi-grid"></div>
+          <canvas id="trendChart" height="120"></canvas>
+        </section>
+
+        <section class="card" id="reportFormSection">
+          <h2>Buat / Edit Laporan Triwulan</h2>
+          <form id="reportForm" class="grid-2">
+            <label>
+              ID Laporan (otomatis)
+              <input id="reportId" readonly />
+            </label>
+            <label>
+              Triwulan
+              <select id="quarterInput">
+                <option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option>
+              </select>
+            </label>
+            <label>
+              Tahun
+              <input id="yearInput" type="number" min="2020" max="2100" value="2026" />
+            </label>
+            <label>
+              Judul Dokumen Perencanaan
+              <input id="planningTitle" placeholder="Rencana Kerja Kelompok" />
+            </label>
+            <label class="full-width">
+              Deskripsi Dokumen Perencanaan
+              <textarea id="planningDesc" rows="2"></textarea>
+            </label>
+            <label class="full-width">
+              Referensi PoA (kegiatan|target|indikator; pisahkan baris)
+              <textarea id="poaInput" rows="4" placeholder="Patroli Hutan|12 kali|Kejadian berkurang"></textarea>
+            </label>
+            <label class="full-width">
+              Ringkasan Progress (Narasi)
+              <textarea id="summaryInput" rows="3"></textarea>
+            </label>
+            <label class="full-width">
+              Progress per Kegiatan (format: kegiatan,persen,catatan)
+              <textarea id="activityProgressInput" rows="4"></textarea>
+            </label>
+            <label class="full-width">
+              Catatan Waktu Tahunan (log)
+              <textarea id="annualLogInput" rows="3"></textarea>
+            </label>
+            <label>
+              Nama Lokasi
+              <input id="locationName" placeholder="Kel. Karang Joang" />
+            </label>
+            <label>
+              Koordinat (lat,long)
+              <input id="coordInput" readonly />
+            </label>
+            <div class="full-width">
+              <p class="muted">Pilih titik lokasi (dibatasi area Balikpapan):</p>
+              <div id="map"></div>
+            </div>
+            <label>
+              Upload Foto (jpg/png)
+              <input id="photoInput" type="file" accept="image/png,image/jpeg" multiple />
+            </label>
+            <label>
+              Upload Dokumen (pdf/doc)
+              <input id="docInput" type="file" accept=".pdf,.doc,.docx" multiple />
+            </label>
+            <div class="actions full-width">
+              <button type="button" id="saveDraftBtn" class="secondary">Simpan Draft</button>
+              <button type="button" id="submitReportBtn">Submit Laporan</button>
+            </div>
+          </form>
+          <div id="attachmentPreview" class="file-list"></div>
+        </section>
+
+        <section class="card" id="reportsSection">
+          <h2>Daftar Laporan</h2>
+          <div class="filters">
+            <select id="statusFilter">
+              <option value="ALL">Semua Status</option>
+              <option>DRAFT</option><option>SUBMITTED</option><option>UNDER_REVIEW</option>
+              <option>APPROVED</option><option>REJECTED</option><option>REVISED</option><option>FINAL_SENT</option>
+            </select>
+            <input id="yearFilter" type="number" placeholder="Filter Tahun" />
+          </div>
+          <div id="reportList"></div>
+        </section>
+
+        <section class="card" id="detailSection">
+          <h2>Detail Laporan</h2>
+          <div id="reportDetail" class="muted">Pilih laporan dari daftar.</div>
+          <div class="actions" id="detailActions"></div>
+        </section>
+
+        <section class="card" id="adminSection">
+          <h2>Admin: Kelola Akun & Template</h2>
+          <form id="accountForm" class="grid-2">
+            <label>Nama Akun<input id="accountName" /></label>
+            <label>Email<input id="accountEmail" type="email" /></label>
+            <label>Peran
+              <select id="accountRole">
+                <option value="PELAPOR">PELAPOR</option>
+                <option value="VERIFIKATOR">VERIFIKATOR</option>
+              </select>
+            </label>
+            <label>Nama Kelompok/Wilayah<input id="accountGroup" /></label>
+            <div class="actions full-width"><button type="submit">Tambah Akun</button></div>
+          </form>
+          <textarea id="templateInput" rows="3">Template PDF: Judul, Identitas, Ringkasan, Tabel Progress, Lokasi, Lampiran</textarea>
+          <div id="accountList"></div>
+        </section>
+
+        <section class="card" id="notificationSection">
+          <h2>Notifikasi & Reminder</h2>
+          <div class="actions">
+            <button id="sendReminderBtn" class="secondary">Send Reminder (>7 hari)</button>
+          </div>
+          <div id="notificationLog" class="log"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

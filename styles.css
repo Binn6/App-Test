@@ -1,0 +1,121 @@
+:root {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #0a7c86;
+  --secondary: #2563eb;
+  --danger: #b91c1c;
+  --ok: #166534;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 12px;
+}
+header {
+  background: linear-gradient(135deg, #0c4a6e, #0a7c86);
+  color: #fff;
+  padding: 16px;
+  border-radius: 14px;
+}
+h1 { font-size: 1.15rem; margin: 0 0 6px; }
+header p { margin: 0 0 8px; font-size: 0.9rem; }
+.banner {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+.banner.online { background: #16a34a; }
+.banner.offline { background: #b45309; }
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+.grid-2 {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+input, select, textarea, button {
+  font: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px;
+}
+textarea { resize: vertical; }
+button {
+  background: var(--primary);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+button.secondary { background: var(--secondary); }
+button.danger { background: var(--danger); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.full-width { grid-column: 1 / -1; }
+.hidden { display: none; }
+.muted { color: var(--muted); }
+#map {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+}
+.kpi-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.kpi {
+  background: #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+}
+.report-item {
+  border: 1px solid #dbeafe;
+  border-left: 5px solid var(--secondary);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 8px 0;
+}
+.status-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #fff;
+  background: #334155;
+}
+.file-list, .log {
+  margin-top: 10px;
+  font-size: 0.86rem;
+}
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.timeline {
+  border-left: 2px solid #94a3b8;
+  margin-top: 8px;
+  padding-left: 8px;
+}
+.timeline p { margin: 6px 0; }
+@media (max-width: 720px) {
+  .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+  .app-shell { padding: 8px; }
+  button { width: 100%; }
+  .actions { flex-direction: column; }
+}
